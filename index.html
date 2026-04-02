@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#c9a84c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>NFC Digital Card</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #07070b;
+      --gold:     #c9a84c;
+      --gold-l:   #e8c56a;
+      --cyan:     #00d4ff;
+      --text:     #f0ede8;
+      --text-sub: rgba(240,237,232,0.55);
+      --text-dim: rgba(240,237,232,0.28);
+      --surface:  rgba(255,255,255,0.04);
+      --border:   rgba(255,255,255,0.07);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 30%, rgba(201,168,76,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 75%, rgba(0,180,220,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      animation: fadeIn 0.6s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Logo / Identity ── */
+    .identity {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .logo-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.3);
+    }
+    .logo-icon svg { width: 40px; height: 40px; }
+
+    .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .title-co {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    .title-co strong {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    /* ── Cards row ── */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .nav-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .nav-card:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .nav-card.primary {
+      background: linear-gradient(120deg, rgba(201,168,76,0.12) 0%, rgba(201,168,76,0.04) 100%);
+      border-color: rgba(201,168,76,0.22);
+    }
+    .nav-card.primary:hover {
+      background: linear-gradient(120deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.07) 100%);
+      border-color: rgba(201,168,76,0.38);
+    }
+
+    .nav-card.secondary {
+      background: linear-gradient(120deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.02) 100%);
+      border-color: rgba(0,212,255,0.15);
+    }
+    .nav-card.secondary:hover {
+      background: linear-gradient(120deg, rgba(0,212,255,0.14) 0%, rgba(0,212,255,0.05) 100%);
+      border-color: rgba(0,212,255,0.28);
+    }
+
+    .nav-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-card.primary .nav-icon { background: rgba(201,168,76,0.15); }
+    .nav-card.secondary .nav-icon { background: rgba(0,212,255,0.1); }
+    .nav-icon svg { width: 22px; height: 22px; }
+
+    .nav-text h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .nav-card.primary .nav-text h3 { color: var(--gold-l); }
+    .nav-card.secondary .nav-text h3 { color: var(--cyan); }
+
+    .nav-text p {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    .nav-arrow {
+      margin-left: auto;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .nav-arrow svg { width: 16px; height: 16px; stroke: currentColor; }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Identity -->
+    <div class="identity">
+      <div class="logo-icon">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Card shape -->
+          <rect x="4" y="10" width="32" height="20" rx="4" fill="rgba(0,0,0,0.3)" stroke="#07070b" stroke-width="1"/>
+          <!-- NFC arcs -->
+          <circle cx="23" cy="20" r="2.5" fill="#07070b"/>
+          <path d="M18 20a5 5 0 0 1 10 0" stroke="#07070b" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M14.5 20a8.5 8.5 0 0 1 17 0" stroke="#07070b" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+          <!-- Chip -->
+          <rect x="7" y="16" width="8" height="6" rx="1.5" fill="#07070b" opacity="0.7"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="name" id="idx-name"></h1>
+        <div class="title-co" id="idx-sub"></div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="cards">
+      <a href="card.html" class="nav-card primary">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <path d="M2 10h20"/>
+          </svg>
+        </div>
+        <div class="nav-text">
+          <h3>View My Card</h3>
+          <p>Open your digital business card &amp; save contact</p>
+        </div>
+        <div class="nav-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </a>
+
+      <a href="write.html" class="nav-card secondary">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="2.5" fill="#00d4ff" stroke="none"/>
+            <path d="M8.5 12a3.5 3.5 0 0 1 7 0" stroke="#00d4ff"/>
+            <path d="M5 12a7 7 0 0 1 14 0" stroke="#00d4ff" opacity="0.6"/>
+            <path d="M1.5 12a10.5 10.5 0 0 1 21 0" stroke="#00d4ff" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="nav-text">
+          <h3>Write NFC Tag</h3>
+          <p>Program a physical NFC tag with your card URL</p>
+        </div>
+        <div class="nav-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </a>
+    </div>
+
+    <div class="footer">Smart Digital NFC Business Card<br>Edit <code>config.js</code> to personalize</div>
+
+  </div>
+
+  <script>
+    const c = CARD_CONFIG;
+    document.getElementById('idx-name').textContent = c.name;
+    document.getElementById('idx-sub').innerHTML =
+      `<strong>${c.title}</strong> · ${c.company}`;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
