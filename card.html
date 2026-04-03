@@ -34,32 +34,52 @@
       --radius:        24px;
     }
 
-    html, body { height: 100%; }
+    html {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden; /* moved here — keeps body full-width */
+    }
 
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
+      width: 100%;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 16px 32px;
-      overflow-x: hidden;
+      padding: 24px 16px 36px;
     }
 
-    /* Ambient glow */
+    /* Ambient glow — centered on desktop, corner on mobile */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse 80% 55% at 15% 35%, rgba(201,168,76,0.07) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 50% at 88% 72%, rgba(0,160,210,0.04) 0%, transparent 60%);
+        radial-gradient(ellipse 70% 60% at 50% 45%, rgba(201,168,76,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 10% 10%, rgba(201,168,76,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 35% at 90% 90%, rgba(0,160,210,0.04) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
     }
+
+    /* ── Desktop background mesh lines (subtle) ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+    }
+    @media (min-width: 768px) { body::after { opacity: 1; } }
 
     /* ── Card Wrapper — gradient border ── */
     .card-wrapper {
@@ -67,6 +87,7 @@
       z-index: 1;
       width: 100%;
       max-width: 420px;
+      margin: 0 auto; /* belt-and-suspenders centering */
       background: linear-gradient(
         140deg,
         rgba(201,168,76,0.4)  0%,
@@ -461,10 +482,172 @@
       letter-spacing: 0.04em;
     }
     .write-link:hover { color: var(--gold); }
+
+    /* ══════════════════════════════════════════
+       DESKTOP LAYOUT  ≥ 960px
+    ══════════════════════════════════════════ */
+
+    /* Page layout: card + sidebar side-by-side */
+    .page-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 420px;
+      z-index: 1;
+    }
+
+    /* Desktop sidebar (hidden on mobile) */
+    .dp-sidebar {
+      display: none;
+    }
+
+    /* Mobile bottom links */
+    .mobile-links {
+      display: flex;
+      gap: 20px;
+      z-index: 1;
+      margin-top: 6px;
+    }
+
+    @media (min-width: 960px) {
+      body {
+        padding: 32px 40px;
+      }
+
+      .page-layout {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        max-width: 900px;
+      }
+
+      /* Card gets a bit more room */
+      .card-wrapper {
+        max-width: 440px;
+        flex-shrink: 0;
+      }
+
+      /* Desktop sidebar becomes visible */
+      .dp-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        width: 260px;
+        flex-shrink: 0;
+        animation: fadeUp 0.5s ease 0.4s both;
+      }
+
+      .mobile-links { display: none; }
+
+      /* On desktop the QR section can auto-open */
+      .qr-section { max-height: none !important; }
+    }
+
+    /* ── Desktop Sidebar Styles ── */
+    .dp-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .dp-qr-box {
+      background: linear-gradient(140deg, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.04) 100%);
+      border: 1px solid var(--border-str);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dp-qr-wrap {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      line-height: 0;
+    }
+
+    .dp-qr-hint {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .dp-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dp-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-sub);
+    }
+    .dp-btn:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.14);
+      color: var(--text);
+      transform: translateX(3px);
+    }
+    .dp-btn.gold {
+      background: rgba(201,168,76,0.08);
+      border-color: rgba(201,168,76,0.22);
+      color: var(--gold-light);
+    }
+    .dp-btn.gold:hover {
+      background: rgba(201,168,76,0.14);
+      border-color: rgba(201,168,76,0.38);
+    }
+    .dp-btn svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; fill: none; }
+
+    .dp-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-str), transparent);
+    }
+
+    .dp-name-area {
+      padding: 4px 0;
+    }
+    .dp-big-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+    .dp-sub {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Page layout: on desktop becomes a row (card + sidebar) -->
+  <div class="page-layout">
+
+  <!-- ── Card ── -->
   <div class="card-wrapper">
     <div class="card">
       <div class="card-accent"></div>
@@ -493,15 +676,15 @@
 
         <!-- Actions -->
         <div class="actions">
-          <button class="btn-save" onclick="downloadVCard()">
+          <!-- <button class="btn-save" onclick="downloadVCard()">
             <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 16l-4-4h3V4h2v8h3l-4 4z"/><path d="M20 18H4v2h16v-2z"/>
             </svg>
             Save to Contacts
-          </button>
+          </button> -->
 
           <!-- Share via NFC (Android Nearby Share) — shown only when Web Share API available -->
-          <button class="btn-nfc-share" id="btn-nfc-share" onclick="shareViaNFC()">
+          <!-- <button class="btn-nfc-share" id="btn-nfc-share" onclick="shareViaNFC()">
             <span class="nfc-pulse">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="2.5" fill="#00d4ff"/>
@@ -511,9 +694,9 @@
               </svg>
             </span>
             Share via NFC / Nearby
-          </button>
+          </button> -->
 
-          <button class="btn-secondary" id="btn-qr" onclick="toggleQR()">
+          <!-- <button class="btn-secondary" id="btn-qr" onclick="toggleQR()">
             <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
               <rect x="4.5" y="4.5" width="4" height="4" fill="currentColor" rx="0.5" stroke="none"/>
@@ -522,15 +705,15 @@
               <path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3"/>
             </svg>
             Show QR Code
-          </button>
+          </button> -->
 
-          <div class="qr-section" id="qr-section">
+          <!-- <div class="qr-section" id="qr-section">
             <div class="qr-inner">
               <div class="qr-label">Scan to open this card</div>
               <div id="qrcode"></div>
               <div class="qr-url" id="qr-url-text"></div>
             </div>
-          </div>
+          </div> -->
         </div>
 
       </div>
@@ -542,7 +725,53 @@
     </div>
   </div>
 
-  <div style="display:flex;gap:20px;z-index:1;margin-top:14px;">
+  <!-- ── Desktop Sidebar (hidden on mobile via CSS) ── -->
+  <div class="dp-sidebar">
+
+    <!-- Name / title recap -->
+    <div class="dp-name-area">
+      <div class="dp-big-name" id="dp-name"></div>
+      <div class="dp-sub" id="dp-sub"></div>
+    </div>
+
+    <div class="dp-divider"></div>
+
+    <!-- Always-visible QR code -->
+    <div class="dp-qr-box">
+      <div class="dp-label">Scan to open card</div>
+      <div class="dp-qr-wrap" id="dp-qrcode"></div>
+      <div class="dp-qr-hint">Point camera here — no app needed</div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="dp-actions">
+      <button class="dp-btn gold" onclick="downloadVCard()">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+        Save Contact (.vcf)
+      </button>
+      <a href="write.html" class="dp-btn">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+          <path d="M9.5 12a2.5 2.5 0 015 0M7 12a5 5 0 0110 0M4.5 12a7.5 7.5 0 0115 0"/>
+        </svg>
+        Share &amp; NFC
+      </a>
+      <a href="edit.html" class="dp-btn">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+        </svg>
+        Edit My Card
+      </a>
+    </div>
+
+  </div>
+
+  </div><!-- end .page-layout -->
+
+  <!-- Mobile-only bottom links -->
+  <div class="mobile-links">
     <a href="write.html" class="write-link">Share &amp; NFC</a>
     <a href="edit.html"  class="write-link">Edit Card</a>
   </div>
@@ -590,6 +819,18 @@
     document.getElementById('card-title').textContent   = c.title;
     document.getElementById('card-company').textContent = c.company;
     if (c.tagline) document.getElementById('card-tagline').textContent = c.tagline;
+
+    // Desktop sidebar
+    document.getElementById('dp-name').textContent = c.name;
+    document.getElementById('dp-sub').textContent  = `${c.title}${c.company ? ' · ' + c.company : ''}`;
+    // Desktop QR (generate only on desktop viewport to save resources)
+    if (window.matchMedia('(min-width: 960px)').matches) {
+      new QRCode(document.getElementById('dp-qrcode'), {
+        text: c.cardUrl, width: 150, height: 150,
+        colorDark: '#08060a', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    }
 
     // Contact items
     const contacts = [
