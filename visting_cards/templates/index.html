@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Business Card Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Professional Business Card Generator</h1>
+        <!-- <p class="subtitle">Create stunning business cards with QR codes in seconds</p> -->
+
+        <div class="content">
+            <div class="form-section">
+                <h2>Enter Your Details</h2>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="Jason Martin">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="job_title">Job Title *</label>
+                        <input type="text" id="job_title" name="job_title" required placeholder="Creative Designer">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userPhoto">Your Photo (For Card Display)</label>
+                        <div class="file-input-group">
+                            <input type="file" id="userPhoto" name="userPhoto" accept="image/*">
+                            <button type="button" class="btn-remove-file" id="removeUserPhoto" style="display: none;">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                        <small>Photo will appear on the card. Note: Photo is not included in QR code to keep it scannable.</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="+1 234 567 8900">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone2">Phone Number 2</label>
+                            <input type="tel" id="phone2" name="phone2" placeholder="+1 234 567 8901">
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="usePhoneAsWhatsapp" name="usePhoneAsWhatsapp">
+                            Use primary phone number for WhatsApp
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required placeholder="contact@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="website">Website</label>
+                        <input type="url" id="website" name="website" placeholder="www.example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" rows="2" placeholder="514, 4th Floor, SM Road, NY 784258"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company Name</label>
+                        <input type="text" id="company" name="company" placeholder="EL Creatives">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logo">Company Logo (Optional)</label>
+                        <div class="file-input-group">
+                            <input type="file" id="logo" name="logo" accept="image/*">
+                            <button type="button" class="btn-remove-file" id="removeLogo" style="display: none;">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                        <small>Upload a square logo for best results (PNG or JPG)</small>
+                    </div>
+
+                    <!-- Design Customization -->
+                    <div class="design-options">
+                        <h3>Customize Design</h3>
+
+                        <div class="form-group">
+                            <label for="cardTheme">Card Theme</label>
+                            <select id="cardTheme" name="cardTheme">
+                                <option value="dark">Dark Professional</option>
+                                <option value="light">Light & Clean</option>
+                                <option value="blue">Blue Corporate</option>
+                                <option value="green">Green Modern</option>
+                                <option value="gradient">Gradient Vibrant</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="accentColor">Accent Color</label>
+                                <input type="color" id="accentColor" name="accentColor" value="#888888">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fontStyle">Font Style</label>
+                                <select id="fontStyle" name="fontStyle">
+                                    <option value="modern">Modern (Segoe UI)</option>
+                                    <option value="classic">Classic (Georgia)</option>
+                                    <option value="tech">Tech (Roboto)</option>
+                                    <option value="elegant">Elegant (Playfair)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-generate">
+                        <i class="fas fa-magic"></i> Generate Business Card
+                    </button>
+                </form>
+            </div>
+
+            <div class="card-section" id="cardSection">
+                <div class="preview-placeholder">
+                    <i class="fas fa-address-card"></i>
+                    <p>Fill the form to generate your business card</p>
+                </div>
+
+                <div class="preview-content" id="previewContent" style="display: none;">
+                    <h2>Your Business Card Preview</h2>
+
+                    <!-- Business Card Preview -->
+                    <div class="business-card" id="businessCard">
+                        <!-- Front Side -->
+                        <div class="card-front">
+                            <div class="card-left">
+                                <div class="brand-bar" id="brandBar"></div>
+                                <div class="card-header">
+                                    <div class="user-photo-container" id="userPhotoContainer" style="display: none;">
+                                        <img id="cardUserPhoto" src="" alt="User Photo">
+                                    </div>
+                                    <div class="card-info">
+                                        <h3 id="cardName">Your Name</h3>
+                                        <p class="card-title" id="cardTitle">Your Title</p>
+                                    </div>
+                                </div>
+
+                                <div class="card-contact">
+                                    <div class="contact-item" id="addressItem" style="display: none;">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <div>
+                                            <span id="cardAddress"></span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item" id="phoneItem" style="display: none;">
+                                        <i class="fas fa-phone-alt"></i>
+                                        <div>
+                                            <span id="cardPhone"></span>
+                                            <span id="cardPhone2"></span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item" id="whatsappItem" style="display: none;">
+                                        <i class="fab fa-whatsapp"></i>
+                                        <div>
+                                            <span id="cardWhatsapp"></span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item" id="emailItem" style="display: none;">
+                                        <i class="fas fa-envelope"></i>
+                                        <div>
+                                            <span id="cardEmail"></span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item" id="websiteItem" style="display: none;">
+                                        <i class="fas fa-globe"></i>
+                                        <div>
+                                            <span id="cardWebsite"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-right">
+                                <div class="qr-container">
+                                    <img id="qrCode" src="" alt="QR Code">
+                                </div>
+                                <div class="logo-container" id="logoContainer">
+                                    <img id="cardLogo" src="" alt="Company Logo" style="display: none;">
+                                    <span id="cardCompany"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-download" onclick="downloadCard()">
+                            <i class="fas fa-download"></i> Download Card
+                        </button>
+                        <button class="btn-download-qr" onclick="downloadQRCode()">
+                            <i class="fas fa-qrcode"></i> Download QR Only
+                        </button>
+                        <button class="btn-reset" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

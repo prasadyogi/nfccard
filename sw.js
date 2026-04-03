@@ -3,12 +3,13 @@
 //  Strategy: Cache-first with network fallback; update in background
 // ═══════════════════════════════════════════════════════════════════════
 
-const CACHE  = 'nfc-card-v1';
+const CACHE  = 'nfc-card-v2';
 const ASSETS = [
   './',
   './index.html',
   './card.html',
   './write.html',
+  './edit.html',
   './config.js',
   './manifest.json',
   './icons/icon.svg',

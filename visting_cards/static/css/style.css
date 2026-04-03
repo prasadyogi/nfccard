@@ -1,0 +1,582 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: white;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.form-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.card-section {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-section h2, .card-section h2 {
+    color: #1a1a2e;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1a1a2e;
+    box-shadow: 0 0 0 3px rgba(26, 26, 46, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.85em;
+}
+
+.checkbox-group {
+    margin-bottom: 15px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+}
+
+.design-options {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.design-options h3 {
+    color: #1a1a2e;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+}
+
+.form-group input[type="color"] {
+    height: 45px;
+    cursor: pointer;
+}
+
+.file-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.file-input-group input[type="file"] {
+    flex: 1;
+}
+
+.btn-remove-file {
+    padding: 8px 15px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.3s;
+    white-space: nowrap;
+}
+
+.btn-remove-file:hover {
+    background: #c82333;
+}
+
+.btn-generate, .btn-download, .btn-download-qr, .btn-new {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-generate {
+    width: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    margin-top: 10px;
+}
+
+.btn-generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(26, 26, 46, 0.4);
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-download {
+    background: #28a745;
+    color: white;
+}
+
+.btn-download:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-download-qr {
+    background: #007bff;
+    color: white;
+}
+
+.btn-download-qr:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+.btn-reset {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-reset:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+}
+
+/* Preview Placeholder */
+.preview-placeholder {
+    text-align: center;
+    color: #999;
+    padding: 60px 20px;
+}
+
+.preview-placeholder i {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.preview-placeholder p {
+    font-size: 1.2em;
+}
+
+.preview-content {
+    width: 100%;
+}
+
+/* Business Card Styles */
+.business-card {
+    background: #2d2d2d;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+.card-front {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr;
+    min-height: 400px;
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+}
+
+.card-left {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 45px 35px;
+    gap: 10px;
+}
+
+.brand-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: linear-gradient(180deg, #888 0%, #555 100%);
+}
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 35px;
+}
+
+.user-photo-container {
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+.user-photo-container img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #888;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card-info {
+    flex: 1;
+    color: white;
+    padding-left: 10px;
+}
+
+.card-info h3 {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+.card-title {
+    font-size: 1em;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.card-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    color: #ccc;
+    font-size: 0.95em;
+}
+
+.contact-item i {
+    width: 20px;
+    color: #888;
+    margin-top: 2px;
+    font-size: 1.1em;
+}
+
+.contact-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.contact-item span {
+    display: block;
+    line-height: 1.6;
+}
+
+.card-right {
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    gap: 30px;
+}
+
+.qr-container {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.qr-container img {
+    display: block;
+    width: 180px;
+    height: 180px;
+}
+
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-container img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.logo-container span {
+    color: white;
+    font-size: 1.3em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+@media (max-width: 1200px) {
+    .content {
+        grid-template-columns: 400px 1fr;
+    }
+
+    .form-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section {
+        max-height: none;
+    }
+
+    .card-front {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .button-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    .form-section, .card-section {
+        padding: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .card-info h3 {
+        font-size: 1.8em;
+    }
+
+    .qr-container img {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Hide empty contact items */
+.contact-item:empty {
+    display: none;
+}
+
+/* WhatsApp icon styling */
+.contact-item .fa-whatsapp {
+    color: #25D366;
+    font-size: 1.2em;
+}
+
+/* Theme Styles */
+.business-card.theme-light .card-front {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+}
+
+.business-card.theme-light .card-info h3,
+.business-card.theme-light .card-title,
+.business-card.theme-light .contact-item {
+    color: #333;
+}
+
+.business-card.theme-light .card-right {
+    background: #f0f0f0;
+}
+
+.business-card.theme-light .logo-container {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.business-card.theme-light .logo-container img {
+    filter: none;
+}
+
+.business-card.theme-light .logo-container span {
+    color: #333;
+}
+
+.business-card.theme-blue .card-front {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+.business-card.theme-green .card-front {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+}
+
+.business-card.theme-gradient .card-front {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Font Styles */
+.font-classic {
+    font-family: Georgia, serif;
+}
+
+.font-tech {
+    font-family: 'Roboto', sans-serif;
+}
+
+.font-elegant {
+    font-family: 'Playfair Display', serif;
+}

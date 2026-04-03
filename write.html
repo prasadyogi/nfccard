@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#00d4ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Write NFC Tag</title>
+  <title>Share Card — NFC</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,10 +20,12 @@
       --bg:         #07070b;
       --cyan:       #00d4ff;
       --cyan-dim:   rgba(0,212,255,0.1);
-      --cyan-glow:  rgba(0,212,255,0.35);
+      --cyan-glow:  rgba(0,212,255,0.3);
       --gold:       #c9a84c;
+      --gold-light: #e8c56a;
       --gold-dim:   rgba(201,168,76,0.12);
       --surface:    rgba(255,255,255,0.04);
+      --surface-hi: rgba(255,255,255,0.07);
       --border:     rgba(255,255,255,0.08);
       --text:       #f0ede8;
       --text-sub:   rgba(240,237,232,0.55);
@@ -44,14 +46,13 @@
       overflow-x: hidden;
     }
 
-    /* Ambient glow */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse 70% 60% at 50% 30%, rgba(0,180,220,0.07) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+        radial-gradient(ellipse 70% 55% at 50% 25%, rgba(0,180,220,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 40% at 15% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
@@ -59,113 +60,293 @@
     /* ── Header ── */
     .header {
       position: relative;
-      z-index: 1;
+      z-index: 10;
       display: flex;
       align-items: center;
-      padding: 16px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
     }
 
     .back-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-size: 13px;
       color: var(--text-muted);
       text-decoration: none;
       transition: color 0.2s;
-      padding: 6px 0;
     }
     .back-btn:hover { color: var(--cyan); }
-    .back-btn svg { width: 16px; height: 16px; stroke: currentColor; flex-shrink: 0; }
+    .back-btn svg { width: 15px; height: 15px; stroke: currentColor; }
 
     .header-title {
       flex: 1;
       text-align: center;
       font-size: 14px;
       font-weight: 600;
-      letter-spacing: 0.04em;
       color: var(--text-sub);
-      margin-right: 60px; /* balance back button */
+      letter-spacing: 0.03em;
     }
 
-    /* ── Main Content ── */
-    .main {
+    .spacer { width: 60px; }
+
+    /* ── Tabs ── */
+    .tab-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      padding: 14px 16px 0;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+    }
+
+    .tab-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* ── Tab Panels ── */
+    .tab-panel {
+      display: none;
       position: relative;
       z-index: 1;
       flex: 1;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 18px 40px;
+      gap: 24px;
+      overflow-y: auto;
+    }
+    .tab-panel.active { display: flex; }
+
+    /* ══════════════════════════════════════════
+       TAB 1 — SHARE NOW
+    ══════════════════════════════════════════ */
+
+    .share-header {
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 32px 20px 40px;
-      gap: 0;
+      gap: 8px;
     }
 
-    /* ── NFC Section ── */
-    .nfc-section {
+    .share-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .share-header p {
+      font-size: 13.5px;
+      color: var(--text-sub);
+      line-height: 1.55;
+      max-width: 290px;
+    }
+
+    /* QR Code */
+    .qr-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 12px;
+    }
+
+    .qr-wrap {
+      background: white;
+      padding: 14px;
+      border-radius: 16px;
+      line-height: 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .qr-hint {
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    /* Share buttons */
+    .share-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       width: 100%;
       max-width: 340px;
     }
 
-    .nfc-heading {
-      text-align: center;
-    }
-
-    .nfc-heading h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .nfc-heading p {
-      font-size: 13.5px;
-      color: var(--text-sub);
-      line-height: 1.55;
-    }
-
-    /* ── NFC Button ── */
-    .nfc-btn-wrap {
-      position: relative;
+    /* Primary Share button */
+    .btn-share-main {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 220px;
-      height: 220px;
+      gap: 10px;
+      padding: 15px 24px;
+      background: linear-gradient(100deg, rgba(0,180,220,0.25) 0%, rgba(0,212,255,0.12) 100%);
+      border: 1.5px solid rgba(0,212,255,0.45);
+      border-radius: 50px;
+      color: var(--cyan);
+      font-family: 'Inter', sans-serif;
+      font-size: 14.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Ripple rings */
-    .ripple {
+    .btn-share-main::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.2) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .btn-share-main:hover {
+      border-color: rgba(0,212,255,0.7);
+      box-shadow: 0 0 28px rgba(0,212,255,0.25), 0 4px 16px rgba(0,0,0,0.3);
+      transform: translateY(-2px);
+    }
+    .btn-share-main:hover::after { opacity: 1; }
+    .btn-share-main:active { transform: translateY(0); }
+    .btn-share-main svg { width: 18px; height: 18px; stroke: currentColor; fill: none; position: relative; z-index: 1; flex-shrink: 0; }
+    .btn-share-main .btn-label { position: relative; z-index: 1; }
+
+    .btn-share-sub {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      color: var(--text-sub);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-share-sub:hover { background: var(--surface-hi); color: var(--text); border-color: rgba(255,255,255,0.14); }
+    .btn-share-sub svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+    /* Nearby share tip */
+    .nearby-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: rgba(0,212,255,0.06);
+      border: 1px solid rgba(0,212,255,0.15);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .nearby-tip svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--cyan); margin-top: 1px; }
+    .nearby-tip p {
+      font-size: 12.5px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+    .nearby-tip strong { color: var(--cyan); }
+
+    /* iOS tip */
+    .ios-tip {
+      background: rgba(201,168,76,0.06);
+      border-color: rgba(201,168,76,0.18);
+    }
+    .ios-tip svg { stroke: var(--gold); }
+    .ios-tip p { }
+    .ios-tip strong { color: var(--gold); }
+
+    /* ══════════════════════════════════════════
+       TAB 2 — WRITE NFC TAG
+    ══════════════════════════════════════════ */
+
+    .nfc-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      width: 100%;
+    }
+
+    .nfc-header {
+      text-align: center;
+    }
+    .nfc-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .nfc-header p {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.55;
+      max-width: 280px;
+    }
+
+    /* NFC Button */
+    .nfc-btn-area {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ripple-ring {
       position: absolute;
       border-radius: 50%;
       border: 1.5px solid var(--cyan);
       opacity: 0;
-      animation: ripple 2.4s linear infinite;
+      animation: rippleGrow 2.6s linear infinite;
       pointer-events: none;
     }
-    .ripple:nth-child(1) { inset: 0;     animation-delay: 0s; }
-    .ripple:nth-child(2) { inset: -22px; animation-delay: 0.8s; }
-    .ripple:nth-child(3) { inset: -44px; animation-delay: 1.6s; }
+    .ripple-ring:nth-child(1) { inset: 0;     animation-delay: 0s; }
+    .ripple-ring:nth-child(2) { inset: -22px; animation-delay: 0.85s; }
+    .ripple-ring:nth-child(3) { inset: -44px; animation-delay: 1.7s; }
 
-    @keyframes ripple {
-      0%   { opacity: 0.5; transform: scale(0.92); }
-      100% { opacity: 0;   transform: scale(1.06); }
+    @keyframes rippleGrow {
+      0%   { opacity: 0.55; transform: scale(0.9); }
+      100% { opacity: 0;   transform: scale(1.07); }
     }
 
     .nfc-btn {
       position: relative;
       z-index: 2;
-      width: 160px;
-      height: 160px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
-      background: radial-gradient(circle at 40% 35%, rgba(0,212,255,0.14) 0%, rgba(0,212,255,0.05) 60%, transparent 80%);
-      border: 2px solid rgba(0,212,255,0.45);
+      background: radial-gradient(circle at 42% 35%, rgba(0,212,255,0.13) 0%, rgba(0,212,255,0.04) 65%, transparent 85%);
+      border: 2px solid rgba(0,212,255,0.4);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -173,111 +354,152 @@
       gap: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 0 30px rgba(0,212,255,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+      box-shadow: 0 0 28px rgba(0,212,255,0.12);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-
-    .nfc-btn:hover {
-      border-color: rgba(0,212,255,0.7);
-      box-shadow: 0 0 45px rgba(0,212,255,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
-      transform: scale(1.03);
+    .nfc-btn:hover:not(:disabled) {
+      border-color: rgba(0,212,255,0.65);
+      box-shadow: 0 0 42px rgba(0,212,255,0.22);
+      transform: scale(1.04);
     }
-    .nfc-btn:active { transform: scale(0.97); }
+    .nfc-btn:active:not(:disabled) { transform: scale(0.97); }
+    .nfc-btn:disabled { cursor: not-allowed; }
 
-    .nfc-btn.writing {
-      border-color: rgba(0,212,255,0.8);
-      box-shadow: 0 0 50px rgba(0,212,255,0.35);
-      animation: writingPulse 1s ease-in-out infinite alternate;
+    .nfc-btn.state-writing {
+      animation: writePulse 1.1s ease-in-out infinite alternate;
+      border-color: rgba(0,212,255,0.75);
     }
-
-    .nfc-btn.success {
-      border-color: rgba(34,197,94,0.7);
-      box-shadow: 0 0 40px rgba(34,197,94,0.3);
+    @keyframes writePulse {
+      from { box-shadow: 0 0 20px rgba(0,212,255,0.2); }
+      to   { box-shadow: 0 0 55px rgba(0,212,255,0.45); }
     }
 
-    .nfc-btn.error {
-      border-color: rgba(239,68,68,0.7);
-      box-shadow: 0 0 40px rgba(239,68,68,0.3);
+    .nfc-btn.state-success {
+      border-color: rgba(34,197,94,0.65);
+      box-shadow: 0 0 36px rgba(34,197,94,0.25);
+    }
+    .nfc-btn.state-error {
+      border-color: rgba(239,68,68,0.65);
+      box-shadow: 0 0 36px rgba(239,68,68,0.2);
       animation: shake 0.5s ease;
     }
-
-    @keyframes writingPulse {
-      from { box-shadow: 0 0 30px rgba(0,212,255,0.25); }
-      to   { box-shadow: 0 0 60px rgba(0,212,255,0.5); }
-    }
-
     @keyframes shake {
       0%,100% { transform: translateX(0); }
-      20%      { transform: translateX(-6px); }
-      40%      { transform: translateX(6px); }
-      60%      { transform: translateX(-4px); }
-      80%      { transform: translateX(4px); }
+      20%  { transform: translateX(-7px); }
+      40%  { transform: translateX(7px); }
+      60%  { transform: translateX(-4px); }
+      80%  { transform: translateX(4px); }
     }
 
-    .nfc-icon-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 52px;
-      height: 52px;
-    }
+    .nfc-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; }
+    .nfc-icon svg { width: 100%; height: 100%; }
 
-    .nfc-icon-wrap svg { width: 100%; height: 100%; }
+    .nfc-spinner {
+      display: none;
+      width: 26px;
+      height: 26px;
+      border: 2px solid rgba(0,212,255,0.2);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .nfc-btn-label {
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--cyan);
       text-align: center;
-      line-height: 1.3;
-      padding: 0 16px;
+      line-height: 1.35;
+      padding: 0 14px;
     }
 
-    /* Spinner for writing state */
-    .spinner {
+    /* Countdown ring */
+    .countdown-wrap {
       display: none;
-      width: 28px;
-      height: 28px;
-      border: 2px solid rgba(0,212,255,0.2);
-      border-top-color: var(--cyan);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Status Message ── */
-    .status-msg {
-      min-height: 40px;
+    .countdown-wrap.visible { display: flex; }
+    .countdown-ring {
+      width: 44px;
+      height: 44px;
+      transform: rotate(-90deg);
+    }
+    .countdown-ring circle {
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 113;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+    .countdown-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyan);
       text-align: center;
-      font-size: 13.5px;
-      line-height: 1.5;
-      color: var(--text-sub);
-      transition: all 0.3s;
     }
-    .status-msg.success { color: var(--green); }
-    .status-msg.error   { color: var(--red); }
 
-    /* ── Instruction Steps ── */
-    .steps {
-      width: 100%;
+    /* Status + Cancel */
+    .nfc-status-row {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 10px;
+      min-height: 60px;
+      text-align: center;
+      width: 100%;
+    }
+    .nfc-status {
+      font-size: 13.5px;
+      color: var(--text-sub);
+      line-height: 1.5;
+      transition: color 0.3s;
+    }
+    .nfc-status.success { color: var(--green); }
+    .nfc-status.error   { color: var(--red); }
+
+    .btn-cancel {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 50px;
+      color: rgba(239,68,68,0.8);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: rgba(239,68,68,0.14); color: var(--red); }
+    .btn-cancel svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 340px;
     }
 
     .step {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      padding: 12px 14px;
+      padding: 11px 14px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
     }
-
     .step-num {
       width: 22px;
       height: 22px;
@@ -293,139 +515,43 @@
       flex-shrink: 0;
       margin-top: 1px;
     }
-
     .step-text {
       font-size: 13px;
       color: var(--text-sub);
       line-height: 1.45;
     }
+    .step-text strong { color: var(--text); font-weight: 500; }
 
-    .step-text strong {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    /* ── OR Separator ── */
-    .or-sep {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      max-width: 340px;
-      margin: 28px 0 20px;
-    }
-    .or-sep::before, .or-sep::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,0.07);
-    }
-    .or-sep span {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-    }
-
-    /* ── QR Fallback ── */
-    .qr-fallback {
-      display: flex;
+    /* Not supported notice */
+    .nfc-unsupported {
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 14px;
+      text-align: center;
+      padding: 30px 0;
       width: 100%;
-      max-width: 340px;
     }
-
-    .qr-fallback h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      text-align: center;
-    }
-
-    .qr-fallback p {
-      font-size: 13px;
-      color: var(--text-sub);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .qr-box {
-      background: white;
-      padding: 12px;
-      border-radius: 12px;
-      line-height: 0;
-    }
-
-    .qr-url-small {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      word-break: break-all;
-      text-align: center;
-    }
-
-    /* ── Share Button ── */
-    .btn-share {
+    .nfc-unsupported svg { width: 48px; height: 48px; stroke: var(--text-muted); }
+    .nfc-unsupported h3 { font-size: 17px; font-weight: 600; color: var(--text-sub); }
+    .nfc-unsupported p { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 280px; }
+    .nfc-unsupported .go-share {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 13px 24px;
-      background: linear-gradient(100deg, #b8932e 0%, #e8c56a 50%, #c9a84c 100%);
-      color: #080606;
-      font-family: 'Inter', sans-serif;
-      font-size: 13.5px;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 20px rgba(201,168,76,0.3);
-      width: 100%;
-    }
-    .btn-share:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(201,168,76,0.5);
-    }
-    .btn-share svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
-
-    /* ── iOS notice ── */
-    .ios-notice {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 14px;
-      background: rgba(201,168,76,0.07);
-      border: 1px solid rgba(201,168,76,0.18);
-      border-radius: 12px;
-      width: 100%;
-    }
-    .ios-notice svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--gold); margin-top: 1px; }
-    .ios-notice p { font-size: 12.5px; color: var(--text-sub); line-height: 1.5; }
-    .ios-notice strong { color: var(--gold); }
-
-    /* ── Copy URL button ── */
-    .btn-copy {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      padding: 10px 18px;
+      gap: 6px;
+      padding: 11px 22px;
       background: var(--surface);
-      color: var(--text-sub);
-      font-size: 12.5px;
-      font-weight: 500;
       border: 1px solid var(--border);
       border-radius: 50px;
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
+      text-decoration: none;
       transition: all 0.2s;
-      width: 100%;
     }
-    .btn-copy:hover { background: rgba(255,255,255,0.07); color: var(--text); }
-    .btn-copy svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+    .nfc-unsupported .go-share:hover { background: var(--surface-hi); }
+    .nfc-unsupported .go-share svg { stroke: currentColor; fill: none; width: 14px; height: 14px; }
   </style>
 </head>
 <body>
@@ -438,278 +564,390 @@
       </svg>
       My Card
     </a>
-    <div class="header-title">NFC Writer</div>
+    <div class="header-title">Share &amp; NFC</div>
+    <div class="spacer"></div>
   </header>
 
-  <!-- Main -->
-  <main class="main">
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-share-btn" onclick="switchTab('share')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
+      </svg>
+      Share Card
+    </button>
+    <button class="tab-btn" id="tab-nfc-btn" onclick="switchTab('nfc')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+        <path d="M9 12a3 3 0 0 1 6 0" stroke-linecap="round"/>
+        <path d="M6.5 12a5.5 5.5 0 0 1 11 0" stroke-linecap="round" opacity="0.6"/>
+        <path d="M4 12a8 8 0 0 1 16 0" stroke-linecap="round" opacity="0.3"/>
+      </svg>
+      Write NFC Tag
+    </button>
+  </div>
 
-    <!-- NFC Section (shown on Android Chrome, hidden on iOS/unsupported) -->
-    <section class="nfc-section" id="nfc-section">
-      <div class="nfc-heading">
-        <h1>Write NFC Tag</h1>
-        <p>Tap the button, then hold your phone near an NFC tag or sticker to write your card URL.</p>
+  <!-- ══ Tab 1: Share ══ -->
+  <div class="tab-panel active" id="panel-share">
+
+    <div class="share-header">
+      <h1>Share Your Card</h1>
+      <p>Show the QR code or tap Share to beam your card to anyone instantly.</p>
+    </div>
+
+    <!-- QR Code -->
+    <div class="qr-container">
+      <div class="qr-wrap" id="qrcode"></div>
+      <div class="qr-hint">Point camera at QR to open card</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="share-actions">
+      <button class="btn-share-main" id="btn-web-share" onclick="webShare()">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+        </svg>
+        <span class="btn-label">Share via Nearby / NFC</span>
+      </button>
+
+      <button class="btn-share-sub" onclick="copyLink()">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+        </svg>
+        <span id="copy-label">Copy Card Link</span>
+      </button>
+    </div>
+
+    <!-- Nearby Share tip (Android) -->
+    <div class="nearby-tip" id="nearby-tip" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+      </svg>
+      <p>Tap <strong>Share via Nearby / NFC</strong> above, then choose <strong>Nearby Share</strong> in the Android share sheet — your phone will use NFC + Bluetooth to beam the card link to a nearby device.</p>
+    </div>
+
+    <!-- iOS tip -->
+    <div class="nearby-tip ios-tip" id="ios-tip" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+      </svg>
+      <p><strong>On iPhone:</strong> Use the Share button above (AirDrop) or let the other person scan the QR code. Web NFC is only available on Android Chrome.</p>
+    </div>
+
+  </div>
+
+  <!-- ══ Tab 2: Write NFC Tag ══ -->
+  <div class="tab-panel" id="panel-nfc">
+
+    <!-- When NFC is not supported -->
+    <div class="nfc-unsupported" id="nfc-unsupported">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      </svg>
+      <h3>NFC Not Available</h3>
+      <p>Web NFC tag writing requires <strong>Android Chrome</strong> on a device with NFC hardware. It is not supported on iOS, Firefox, or desktop browsers.</p>
+      <button class="go-share" onclick="switchTab('share')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15.75 19.5L8.25 12l7.5-7.5"/>
+        </svg>
+        Use Share Instead
+      </button>
+    </div>
+
+    <!-- When NFC is supported -->
+    <div class="nfc-section" id="nfc-writer">
+
+      <div class="nfc-header">
+        <h2>Write NFC Sticker</h2>
+        <p>Programme a physical NFC tag once. Anyone who taps it will open your card — forever.</p>
       </div>
 
       <!-- NFC Button -->
-      <div class="nfc-btn-wrap">
-        <div class="ripple"></div>
-        <div class="ripple"></div>
-        <div class="ripple"></div>
-        <button class="nfc-btn" id="nfc-btn" onclick="handleNFC()">
-          <div class="nfc-icon-wrap" id="nfc-icon">
-            <!-- NFC signal icon -->
-            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="30" cy="30" r="4.5" fill="#00d4ff"/>
-              <path d="M20.5 30a9.5 9.5 0 0 1 19 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M13.5 30a16.5 16.5 0 0 1 33 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
-              <path d="M6.5 30a23.5 23.5 0 0 1 47 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" opacity="0.28"/>
+      <div class="nfc-btn-area">
+        <div class="ripple-ring"></div>
+        <div class="ripple-ring"></div>
+        <div class="ripple-ring"></div>
+        <button class="nfc-btn" id="nfc-btn" onclick="handleNFCWrite()">
+          <div class="nfc-icon" id="nfc-icon">
+            <svg viewBox="0 0 60 60" fill="none">
+              <circle cx="30" cy="30" r="5" fill="#00d4ff"/>
+              <path d="M20 30a10 10 0 0 1 20 0" stroke="#00d4ff" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M13 30a17 17 0 0 1 34 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+              <path d="M6 30a24 24 0 0 1 48 0" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" opacity="0.25"/>
             </svg>
           </div>
-          <div class="spinner" id="nfc-spinner"></div>
-          <span class="nfc-btn-label" id="nfc-label">Tap to Write<br>NFC Tag</span>
+          <div class="nfc-spinner" id="nfc-spinner"></div>
+          <div class="nfc-btn-label" id="nfc-label">Tap to<br>Write Tag</div>
         </button>
       </div>
 
-      <!-- Status -->
-      <div class="status-msg" id="status-msg">
-        Tap the button, then hold near an NFC tag.
+      <!-- Countdown + Status + Cancel -->
+      <div class="nfc-status-row">
+        <div class="countdown-wrap" id="countdown-wrap">
+          <svg class="countdown-ring" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" id="countdown-circle"/>
+          </svg>
+          <div class="countdown-num" id="countdown-num">30</div>
+        </div>
+        <div class="nfc-status" id="nfc-status">
+          Tap the button, then hold your phone flat against an NFC tag or sticker.
+        </div>
+        <button class="btn-cancel" id="btn-cancel" onclick="cancelNFC()">
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Cancel
+        </button>
       </div>
 
       <!-- Steps -->
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
-          <div class="step-text"><strong>Tap the button above</strong> — this activates NFC write mode in your browser.</div>
+          <div class="step-text"><strong>Get a blank NFC tag</strong> — NTAG213 stickers (cheap on Amazon) work perfectly.</div>
         </div>
         <div class="step">
           <div class="step-num">2</div>
-          <div class="step-text"><strong>Hold your phone</strong> over a blank NFC tag or sticker.</div>
+          <div class="step-text"><strong>Tap the button above</strong> to activate NFC write mode.</div>
         </div>
         <div class="step">
           <div class="step-num">3</div>
-          <div class="step-text"><strong>Done!</strong> Anyone who taps the tag will open your digital card.</div>
+          <div class="step-text"><strong>Hold your phone</strong> flat on the NFC sticker — done! Your card URL is written.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>Anyone who taps the sticker</strong> will instantly see your digital card — no app needed.</div>
         </div>
       </div>
-    </section>
 
-    <!-- OR separator -->
-    <div class="or-sep" id="or-sep">
-      <span>Share via</span>
     </div>
-
-    <!-- QR + Share fallback (always visible) -->
-    <section class="qr-fallback" id="qr-section">
-      <h3 id="qr-heading">QR Code</h3>
-      <p id="qr-subtext">Scan to open your digital business card on any device.</p>
-      <div class="qr-box" id="qrcode"></div>
-      <div class="qr-url-small" id="qr-url-text"></div>
-
-      <!-- Web Share -->
-      <button class="btn-share" id="btn-share" onclick="shareCard()" style="display:none">
-        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98M21 5a3 3 0 11-6 0 3 3 0 016 0zM9 12a3 3 0 11-6 0 3 3 0 016 0zM21 19a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        Share Card
-      </button>
-
-      <!-- Copy URL -->
-      <button class="btn-copy" onclick="copyURL()">
-        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-        </svg>
-        <span id="copy-label">Copy Card URL</span>
-      </button>
-
-      <!-- iOS notice -->
-      <div class="ios-notice" id="ios-notice" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
-        </svg>
-        <p><strong>iOS / Safari detected.</strong> Web NFC is only available on Android Chrome. Use the QR code or Share button to send your card instead.</p>
-      </div>
-    </section>
-
-  </main>
+  </div>
 
   <script>
-    /* ──────────────────────────────────────────────────────────────────
-       DETECTION
-    ────────────────────────────────────────────────────────────────── */
-    const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const hasNFC    = 'NDEFReader' in window;
-    const hasShare  = !!navigator.share;
+    /* ─── Read card data: localStorage first, then config.js ─── */
+    const savedData = localStorage.getItem('nfc_card_data');
+    const c = savedData ? JSON.parse(savedData) : CARD_CONFIG;
+    if (!c.cardUrl) {
+      c.cardUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'card.html';
+    }
 
-    /* ──────────────────────────────────────────────────────────────────
-       SETUP
-    ────────────────────────────────────────────────────────────────── */
-    const c = CARD_CONFIG;
+    /* ─── Device detection ─── */
+    const isIOS    = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const hasNFC   = 'NDEFReader' in window;
+    const hasShare = !!navigator.share;
 
-    // Generate QR code
+    /* ─── Generate QR ─── */
     new QRCode(document.getElementById('qrcode'), {
       text:         c.cardUrl,
-      width:        180,
-      height:       180,
+      width:        190,
+      height:       190,
       colorDark:    '#08060a',
       colorLight:   '#ffffff',
       correctLevel: QRCode.CorrectLevel.M,
     });
 
-    document.getElementById('qr-url-text').textContent = c.cardUrl;
+    /* ─── Show appropriate tip ─── */
+    if (isIOS)     document.getElementById('ios-tip').style.display     = 'flex';
+    else if (isAndroid) document.getElementById('nearby-tip').style.display = 'flex';
 
-    // Show/hide Web Share button
-    if (hasShare) {
-      document.getElementById('btn-share').style.display = 'flex';
+    /* ─── Share button visibility ─── */
+    if (!hasShare) {
+      // Replace share button with copy-only message
+      const btn = document.getElementById('btn-web-share');
+      btn.style.display = 'none';
     }
 
-    // If NFC not supported or iOS, hide NFC section
-    if (!hasNFC || isIOS) {
-      document.getElementById('nfc-section').style.display = 'none';
-      document.getElementById('or-sep').style.display      = 'none';
-
-      document.getElementById('qr-heading').textContent  = 'Share Your Card';
-      document.getElementById('qr-subtext').textContent  = 'Scan this QR code or use the share button to send your digital card to anyone.';
-
-      if (isIOS) {
-        document.getElementById('ios-notice').style.display = 'flex';
-      }
+    /* ─── NFC Tab: show writer or unsupported ─── */
+    if (!hasNFC) {
+      document.getElementById('nfc-unsupported').style.display = 'flex';
+      document.getElementById('nfc-writer').style.display      = 'none';
     }
 
-    /* ──────────────────────────────────────────────────────────────────
-       NFC STATE MACHINE
-    ────────────────────────────────────────────────────────────────── */
-    let nfcState = 'idle'; // idle | writing | success | error
-
-    const btn      = document.getElementById('nfc-btn');
-    const icon     = document.getElementById('nfc-icon');
-    const spinner  = document.getElementById('nfc-spinner');
-    const label    = document.getElementById('nfc-label');
-    const statusEl = document.getElementById('status-msg');
-
-    function setState(state, message) {
-      nfcState = state;
-      btn.className = 'nfc-btn ' + (state === 'idle' ? '' : state);
-      statusEl.className = 'status-msg ' + (state === 'idle' || state === 'writing' ? '' : state);
-      statusEl.textContent = message || '';
-
-      if (state === 'writing') {
-        icon.style.display    = 'none';
-        spinner.style.display = 'block';
-        label.textContent     = 'Scanning…\nHold near tag';
-        btn.disabled          = true;
-      } else {
-        icon.style.display    = 'flex';
-        spinner.style.display = 'none';
-        btn.disabled          = false;
-
-        if (state === 'success') {
-          icon.innerHTML = `<svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="24" stroke="#22c55e" stroke-width="2.5"/><path d="M18 30l9 9 15-18" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-          label.textContent = 'Tag Written!';
-          label.style.color = 'var(--green)';
-          // Auto-reset after 3s
-          setTimeout(() => resetState(), 3000);
-        } else if (state === 'error') {
-          icon.innerHTML = `<svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="24" stroke="#ef4444" stroke-width="2.5"/><path d="M20 20l20 20M40 20L20 40" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></svg>`;
-          label.textContent = 'Failed — Tap to retry';
-          label.style.color = 'var(--red)';
-          setTimeout(() => resetState(), 3500);
-        } else {
-          // idle
-          icon.innerHTML = `<svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="30" cy="30" r="4.5" fill="#00d4ff"/>
-            <path d="M20.5 30a9.5 9.5 0 0 1 19 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M13.5 30a16.5 16.5 0 0 1 33 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
-            <path d="M6.5 30a23.5 23.5 0 0 1 47 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" opacity="0.28"/>
-          </svg>`;
-          label.innerHTML   = 'Tap to Write<br>NFC Tag';
-          label.style.color = 'var(--cyan)';
-        }
-      }
+    /* ─── Tab switching ─── */
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab + '-btn').classList.add('active');
+      document.getElementById('panel-' + tab).classList.add('active');
     }
 
-    function resetState() {
-      setState('idle', 'Tap the button, then hold near an NFC tag.');
-    }
-
-    async function handleNFC() {
-      if (nfcState === 'writing') return;
-
-      setState('writing', 'Hold your phone close to an NFC tag or sticker…');
-
-      try {
-        const ndef = new NDEFReader();
-
-        await ndef.write({
-          records: [{
-            recordType: 'url',
-            data: c.cardUrl,
-          }]
-        });
-
-        setState('success', `✓ NFC tag successfully written with your card URL.`);
-
-      } catch (err) {
-        let msg = 'Write failed. Please try again.';
-
-        if (err.name === 'NotAllowedError') {
-          msg = 'NFC permission denied. Please allow NFC access and try again.';
-        } else if (err.name === 'NotSupportedError') {
-          msg = 'NFC write is not supported on this device or browser.';
-        } else if (err.name === 'AbortError') {
-          msg = 'Write cancelled. Tap to try again.';
-        } else if (err.message) {
-          msg = `Error: ${err.message}`;
-        }
-
-        setState('error', msg);
-      }
-    }
-
-    /* ──────────────────────────────────────────────────────────────────
-       WEB SHARE
-    ────────────────────────────────────────────────────────────────── */
-    async function shareCard() {
+    /* ─── Web Share ─── */
+    async function webShare() {
+      if (!navigator.share) { copyLink(); return; }
       try {
         await navigator.share({
-          title: `${c.name} — Digital Business Card`,
+          title: `${c.name} — ${c.title}`,
           text:  `${c.name}, ${c.title} at ${c.company}`,
           url:   c.cardUrl,
         });
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          copyURL();
-        }
+        if (err.name !== 'AbortError') copyLink();
       }
     }
 
-    /* ──────────────────────────────────────────────────────────────────
-       COPY URL
-    ────────────────────────────────────────────────────────────────── */
-    async function copyURL() {
-      const copyLabel = document.getElementById('copy-label');
+    /* ─── Copy Link ─── */
+    async function copyLink() {
+      const label = document.getElementById('copy-label');
       try {
         await navigator.clipboard.writeText(c.cardUrl);
-        copyLabel.textContent = 'Copied!';
-        setTimeout(() => { copyLabel.textContent = 'Copy Card URL'; }, 2000);
-      } catch (err) {
-        // Fallback
+      } catch (_) {
         const ta = document.createElement('textarea');
         ta.value = c.cardUrl;
-        ta.style.position = 'fixed';
-        ta.style.opacity  = '0';
+        Object.assign(ta.style, { position:'fixed', opacity:'0' });
         document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
+        ta.focus(); ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        copyLabel.textContent = 'Copied!';
-        setTimeout(() => { copyLabel.textContent = 'Copy Card URL'; }, 2000);
+      }
+      label.textContent = '✓ Copied!';
+      setTimeout(() => { label.textContent = 'Copy Card Link'; }, 2200);
+    }
+
+    /* ══════════════════════════════════════════
+       NFC WRITE STATE MACHINE
+    ══════════════════════════════════════════ */
+    let nfcAbortController = null;
+    let countdownInterval  = null;
+    const TIMEOUT_SEC      = 30;
+
+    const nfcBtn      = document.getElementById('nfc-btn');
+    const nfcIcon     = document.getElementById('nfc-icon');
+    const nfcSpinner  = document.getElementById('nfc-spinner');
+    const nfcLabel    = document.getElementById('nfc-label');
+    const nfcStatus   = document.getElementById('nfc-status');
+    const btnCancel   = document.getElementById('btn-cancel');
+    const countWrap   = document.getElementById('countdown-wrap');
+    const countNum    = document.getElementById('countdown-num');
+    const countCircle = document.getElementById('countdown-circle');
+    const CIRCUMF     = 113; // 2π × 18
+
+    function setNFCState(state, message) {
+      nfcBtn.className    = 'nfc-btn state-' + state;
+      nfcStatus.className = 'nfc-status' + (state === 'success' ? ' success' : state === 'error' ? ' error' : '');
+      nfcStatus.textContent = message || '';
+
+      const isWriting = (state === 'writing');
+      nfcIcon.style.display    = isWriting ? 'none' : 'flex';
+      nfcSpinner.style.display = isWriting ? 'block' : 'none';
+      nfcBtn.disabled          = isWriting;
+      btnCancel.style.display  = isWriting ? 'flex' : 'none';
+      countWrap.className      = 'countdown-wrap' + (isWriting ? ' visible' : '');
+
+      if (state === 'success') {
+        nfcIcon.innerHTML = `<svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="26" stroke="#22c55e" stroke-width="2.5"/><path d="M18 30l10 10 14-20" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        nfcLabel.textContent = 'Written!';
+        nfcLabel.style.color = 'var(--green)';
+        setTimeout(resetNFC, 3500);
+      } else if (state === 'error') {
+        nfcIcon.innerHTML = `<svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="26" stroke="#ef4444" stroke-width="2.5"/><path d="M20 20l20 20M40 20L20 40" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+        nfcLabel.style.color = 'var(--red)';
+        nfcLabel.innerHTML   = 'Tap to<br>Retry';
+        setTimeout(resetNFC, 4000);
+      } else if (state === 'idle') {
+        resetNFCIcon();
       }
     }
 
-    /* ──────────────────────────────────────────────────────────────────
-       SERVICE WORKER
-    ────────────────────────────────────────────────────────────────── */
+    function resetNFCIcon() {
+      nfcIcon.innerHTML = `<svg viewBox="0 0 60 60" fill="none">
+        <circle cx="30" cy="30" r="5" fill="#00d4ff"/>
+        <path d="M20 30a10 10 0 0 1 20 0" stroke="#00d4ff" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M13 30a17 17 0 0 1 34 0" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+        <path d="M6 30a24 24 0 0 1 48 0" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" opacity="0.25"/>
+      </svg>`;
+      nfcLabel.innerHTML   = 'Tap to<br>Write Tag';
+      nfcLabel.style.color = 'var(--cyan)';
+    }
+
+    function resetNFC() {
+      clearCountdown();
+      setNFCState('idle', 'Tap the button, then hold your phone flat against an NFC tag or sticker.');
+    }
+
+    /* ── Countdown timer ── */
+    function startCountdown(seconds, onExpire) {
+      let remaining = seconds;
+      countNum.textContent = remaining;
+      countCircle.style.strokeDashoffset = 0;
+
+      countdownInterval = setInterval(() => {
+        remaining--;
+        countNum.textContent = remaining;
+        const progress = (seconds - remaining) / seconds;
+        countCircle.style.strokeDashoffset = CIRCUMF * progress;
+        if (remaining <= 0) {
+          clearCountdown();
+          onExpire();
+        }
+      }, 1000);
+    }
+
+    function clearCountdown() {
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    }
+
+    /* ── Cancel ── */
+    function cancelNFC() {
+      if (nfcAbortController) { nfcAbortController.abort(); nfcAbortController = null; }
+      clearCountdown();
+      resetNFC();
+    }
+
+    /* ── Write ── */
+    async function handleNFCWrite() {
+      if (nfcBtn.disabled) return;
+
+      setNFCState('writing', 'Hold your phone flat on a blank NFC tag or sticker…');
+
+      nfcAbortController = new AbortController();
+
+      // Start countdown — auto-cancel after TIMEOUT_SEC
+      startCountdown(TIMEOUT_SEC, () => {
+        if (nfcAbortController) {
+          nfcAbortController.abort();
+          nfcAbortController = null;
+          setNFCState('error', `No tag found within ${TIMEOUT_SEC}s. Make sure you have a blank NFC sticker and hold it close.`);
+        }
+      });
+
+      try {
+        const ndef = new NDEFReader();
+
+        await ndef.write(
+          { records: [{ recordType: 'url', data: c.cardUrl }] },
+          { signal: nfcAbortController.signal }
+        );
+
+        clearCountdown();
+        nfcAbortController = null;
+        setNFCState('success', `Tag written! Anyone who taps it will open: ${c.cardUrl}`);
+
+      } catch (err) {
+        clearCountdown();
+        nfcAbortController = null;
+
+        if (err.name === 'AbortError') {
+          // User clicked cancel — already handled
+          return;
+        }
+
+        let msg = 'Write failed. Please try again.';
+        if (err.name === 'NotAllowedError') {
+          msg = 'NFC permission denied. Please tap Allow when prompted and try again.';
+        } else if (err.name === 'NotSupportedError') {
+          msg = 'This device does not support NFC writing. Make sure NFC is turned on in Settings.';
+        } else if (err.name === 'NetworkError' || err.message.includes('No NFC')) {
+          msg = 'No NFC tag detected. Hold your phone flat against the sticker and try again.';
+        } else if (err.message) {
+          msg = `Error: ${err.message}`;
+        }
+
+        setNFCState('error', msg);
+      }
+    }
+
+    /* ─── Service Worker ─── */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(() => {});

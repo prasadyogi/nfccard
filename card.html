@@ -542,7 +542,10 @@
     </div>
   </div>
 
-  <a href="write.html" class="write-link">⟵ Write to NFC Tag</a>
+  <div style="display:flex;gap:20px;z-index:1;margin-top:14px;">
+    <a href="write.html" class="write-link">Share &amp; NFC</a>
+    <a href="edit.html"  class="write-link">Edit Card</a>
+  </div>
 
   <script>
     /* ──────────────────────────────────────────────────────────────────
@@ -564,8 +567,13 @@
 
     /* ──────────────────────────────────────────────────────────────────
        POPULATE CARD
+       Priority: localStorage (edited by user) → config.js (defaults)
     ────────────────────────────────────────────────────────────────── */
-    const c = CARD_CONFIG;
+    const _saved = localStorage.getItem('nfc_card_data');
+    const c = _saved ? JSON.parse(_saved) : CARD_CONFIG;
+    if (!c.cardUrl) {
+      c.cardUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'card.html';
+    }
 
     // Page title
     document.getElementById('page-title').textContent = `${c.name} — ${c.title}`;

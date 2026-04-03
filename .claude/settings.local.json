@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l C:/Users/CaratRED/Desktop/connect/*.html)",
+      "Bash(vercel:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
