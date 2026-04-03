@@ -541,6 +541,7 @@
       }
 
       .mobile-links { display: none; }
+      .dp-hide-on-desktop { display: none !important; }
 
       /* On desktop the QR section can auto-open */
       .qr-section { max-height: none !important; }
@@ -676,17 +677,18 @@
         <!-- card changes -->
         <!-- Actions -->
         <div class="actions">
-          <!-- <button class="btn-save" onclick="downloadVCard()">
+          <!-- Save to Contacts -->
+          <button class="btn-save" onclick="downloadVCard()">
             <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 16l-4-4h3V4h2v8h3l-4 4z"/><path d="M20 18H4v2h16v-2z"/>
             </svg>
             Save to Contacts
-          </button> -->
+          </button>
 
-          <!-- Share via NFC (Android Nearby Share) — shown only when Web Share API available -->
-          <!-- <button class="btn-nfc-share" id="btn-nfc-share" onclick="shareViaNFC()">
+          <!-- Share via NFC / Nearby — shown when Web Share API available -->
+          <button class="btn-nfc-share" id="btn-nfc-share" onclick="shareViaNFC()">
             <span class="nfc-pulse">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="2.5" fill="#00d4ff"/>
                 <path d="M8.2 12a3.8 3.8 0 0 1 7.6 0" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round"/>
                 <path d="M4.8 12a7.2 7.2 0 0 1 14.4 0" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
@@ -694,9 +696,10 @@
               </svg>
             </span>
             Share via NFC / Nearby
-          </button> -->
+          </button>
 
-          <!-- <button class="btn-secondary" id="btn-qr" onclick="toggleQR()">
+          <!-- QR Code toggle (mobile) — hidden on desktop since sidebar shows it -->
+          <button class="btn-secondary dp-hide-on-desktop" id="btn-qr" onclick="toggleQR()">
             <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
               <rect x="4.5" y="4.5" width="4" height="4" fill="currentColor" rx="0.5" stroke="none"/>
@@ -704,16 +707,16 @@
               <rect x="4.5" y="15.5" width="4" height="4" fill="currentColor" rx="0.5" stroke="none"/>
               <path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3"/>
             </svg>
-            Show QR Code
-          </button> -->
+            <span id="btn-qr-label">Show QR Code</span>
+          </button>
 
-          <!-- <div class="qr-section" id="qr-section">
+          <div class="qr-section" id="qr-section">
             <div class="qr-inner">
               <div class="qr-label">Scan to open this card</div>
               <div id="qrcode"></div>
               <div class="qr-url" id="qr-url-text"></div>
             </div>
-          </div> -->
+          </div>
         </div>
 
       </div>
@@ -896,17 +899,11 @@
     let qrGenerated = false;
 
     function toggleQR() {
-      const section = document.getElementById('qr-section');
-      const btn     = document.getElementById('btn-qr');
-      const isOpen  = section.classList.toggle('open');
+      const section  = document.getElementById('qr-section');
+      const labelEl  = document.getElementById('btn-qr-label');
+      const isOpen   = section.classList.toggle('open');
 
-      btn.querySelector('.btn-text') && (btn.querySelector('.btn-text').textContent = isOpen ? 'Hide QR Code' : 'Show QR Code');
-      if (!btn.querySelector('.btn-text')) {
-        // Update button text (keep SVG)
-        const svgEl = btn.querySelector('svg');
-        btn.textContent = isOpen ? ' Hide QR Code' : ' Show QR Code';
-        btn.prepend(svgEl);
-      }
+      if (labelEl) labelEl.textContent = isOpen ? 'Hide QR Code' : 'Show QR Code';
 
       if (isOpen && !qrGenerated) {
         qrGenerated = true;
@@ -920,6 +917,13 @@
         });
       }
     }
+
+    // Auto-open QR on mobile so user sees it immediately
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.matchMedia('(min-width: 960px)').matches) {
+        toggleQR();
+      }
+    });
 
     /* ──────────────────────────────────────────────────────────────────
        NFC / WEB SHARE
